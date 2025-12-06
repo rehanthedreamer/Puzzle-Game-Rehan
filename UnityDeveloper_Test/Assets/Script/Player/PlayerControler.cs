@@ -55,7 +55,7 @@ public class PlayerControler : MonoBehaviour
           ApplyDirectionalGravity();
     }
 
-
+// Player move and rotation controler
     void MovePlayer()
     {
         float h = 0f, v = 0f;
@@ -83,6 +83,7 @@ public class PlayerControler : MonoBehaviour
         }
     }
 
+// handle player jump from space
     void HandleJump()
     {
         if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
@@ -91,11 +92,13 @@ public class PlayerControler : MonoBehaviour
         }
     }
 
+// check of player is on ground 
     bool IsGrounded()
     {
         return Physics.Raycast(transform.position, -transform.up, 1.1f);
     }
 
+// Holo controller 
     void RotateHolo()
     {
         bool holoActive =
@@ -125,7 +128,7 @@ public class PlayerControler : MonoBehaviour
             holoParent.localRotation = Quaternion.Euler(pendingRotation);
         }
 
-        //  APPLY final
+        //  APPLY gravity to the player when press enter
         if (!holoActive && isPreviewing && Input.GetKeyDown(KeyCode.Return))
         {
             isPreviewing = false;
@@ -144,6 +147,7 @@ public class PlayerControler : MonoBehaviour
             rb.AddForce(gravityDirection * gravityStrength, ForceMode.Acceleration);
     }
 
+
     void OnCollisionEnter(Collision collision)
     {
         if (collision.collider.CompareTag("Point"))
@@ -156,31 +160,34 @@ public class PlayerControler : MonoBehaviour
         }
     }
 
+// check player on ground by raycast 
     void CheckGround()
-{
-    isGrounded = Physics.Raycast(
-        transform.position,
-        gravityDirection.normalized,
-        groundCheckDistance,
-        groundLayer
-    );
-}
-void CheckFreeFall()
-{
-    if (!isGrounded)
     {
-        fallTime += Time.deltaTime;
+        isGrounded = Physics.Raycast(
+            transform.position,
+            gravityDirection.normalized,
+            groundCheckDistance,
+            groundLayer
+        );
+    }
 
-        if (fallTime >= maxFallTime)
+// check if player is free falling
+void CheckFreeFall()
         {
-         TimerManager.instance.StopTimer();
+            if (!isGrounded)
+            {
+                fallTime += Time.deltaTime;
+
+                if (fallTime >= maxFallTime)
+                {
+                TimerManager.instance.StopTimer();
+                }
+            }
+            else
+            {
+                fallTime = 0f; 
+            }
         }
-    }
-    else
-    {
-        fallTime = 0f; 
-    }
-}
-    }
+        }
 
 }

@@ -19,11 +19,7 @@ public class HUD : MonoBehaviour
        TimerManager.OnTimerUpdated -= UpdateTimerUI;
        PlayerControler.updateCubeCount -= UpdateCubeCountUI;  
     }
-    void Start()
-    {
-      
-    }
-
+  
     void UpdateTimerUI(string timeText)
     {
         timerText.text = timeText;

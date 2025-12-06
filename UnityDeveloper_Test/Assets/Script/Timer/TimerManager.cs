@@ -11,7 +11,7 @@ public class TimerManager : MonoBehaviour
     public static event Action onClickGamePlay;
 
     [Header("Timer Settings")]
-    public float startTime = 120f; // 2 minutes
+    public float startTime = 120f; 
     private float currentTime;
     private bool isRunning = false;
 
@@ -29,7 +29,7 @@ public class TimerManager : MonoBehaviour
     {
         onClickGamePlay -= OnClikcStartTimer;
     }
-
+// start timer when user tap on play button 
     public void OnClikcStartTimer()
     {
         ResetTimer();
@@ -37,6 +37,7 @@ public class TimerManager : MonoBehaviour
         OnTimerStart?.Invoke();
     }
 
+// check active timer 
     void Update()
     {
         if (!isRunning) return;
@@ -53,7 +54,7 @@ public class TimerManager : MonoBehaviour
         OnTimerUpdated?.Invoke(FormatTime(currentTime));
     }
 
-    // Format time into MM:SS
+    // Format time in MM:SS
     public static string FormatTime(float time)
     {
         int minutes = Mathf.FloorToInt(time / 60);
@@ -66,12 +67,14 @@ public class TimerManager : MonoBehaviour
         isRunning = true;
     }
 
+// stop timer
     public void StopTimer()
     {
         isRunning = false;
         OnTimerFinished?.Invoke();
     }
 
+// rest timer 
     public void ResetTimer()
     {
         currentTime = startTime;
