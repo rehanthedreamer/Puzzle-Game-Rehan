@@ -5,12 +5,11 @@ using UnityEngine;
 public class PlayerControler : MonoBehaviour
 {
     public static event Action<string> updateCubeCount;
-     public static event Action showGameCompleted;
+    public static event Action showGameCompleted;
 
     [Header("References")]
     [SerializeField] Animator animator;
     [SerializeField] Transform body;
-    [SerializeField] Transform cameraParent;
 
     [Header("Movement")]
     public float moveSpeed = 6f;
@@ -39,6 +38,7 @@ public class PlayerControler : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotation;  
+    }
 
     void Update()
     {
@@ -144,7 +144,7 @@ public class PlayerControler : MonoBehaviour
     void ApplyDirectionalGravity()
     {
         
-            rb.AddForce(gravityDirection * gravityStrength, ForceMode.Acceleration);
+        rb.AddForce(gravityDirection * gravityStrength, ForceMode.Acceleration);
     }
 
 
@@ -172,8 +172,8 @@ public class PlayerControler : MonoBehaviour
     }
 
 // check if player is free falling
-void CheckFreeFall()
-        {
+    void CheckFreeFall()
+    {
             if (!isGrounded)
             {
                 fallTime += Time.deltaTime;
@@ -187,7 +187,7 @@ void CheckFreeFall()
             {
                 fallTime = 0f; 
             }
-        }
-        }
+    }
+    
 
 }
