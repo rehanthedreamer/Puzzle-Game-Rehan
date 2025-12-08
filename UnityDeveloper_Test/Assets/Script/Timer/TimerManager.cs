@@ -29,6 +29,11 @@ public class TimerManager : MonoBehaviour
     {
         onClickGamePlay -= OnClikcStartTimer;
     }
+
+    public bool GetIsTimeRunning()
+    {
+        return isRunning;
+    }
 // start timer when user tap on play button 
     public void OnClikcStartTimer()
     {

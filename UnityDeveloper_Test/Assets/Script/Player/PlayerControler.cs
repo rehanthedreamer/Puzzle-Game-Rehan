@@ -42,6 +42,8 @@ public class PlayerControler : MonoBehaviour
 
     void Update()
     {
+        if(!TimerManager.instance.GetIsTimeRunning())return;
+
         MovePlayer();
         HandleJump();
         RotateHolo();
@@ -72,16 +74,37 @@ public class PlayerControler : MonoBehaviour
 
         if (input.magnitude > 0)
         {
-        Vector3 moveDir = transform.right * input.x + transform.forward * input.z;
-        rb.MovePosition(rb.position + moveDir * moveSpeed * Time.deltaTime);
+        Vector3 moveDir = body.transform.right * input.x + body.transform.forward * input.z;
+        rb.MovePosition(rb.position - moveDir * moveSpeed * Time.deltaTime);
         
-        if (moveDir.magnitude > 0)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(moveDir, transform.up);
-            body.rotation = Quaternion.Slerp(body.rotation, targetRot, Time.deltaTime * 10f);
+        // if (moveDir.magnitude > 0)
+        // {
+        //     Quaternion targetRot = Quaternion.LookRotation(moveDir, transform.up);
+        //     body.rotation = Quaternion.Slerp(body.rotation, targetRot, Time.deltaTime * 10f);
+        // }
         }
-        }
+        MouseYawRotation();
     }
+
+void MouseYawRotation()
+{
+    Vector2 screenCenter = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+    Vector2 mousePos = Input.mousePosition;
+    float mouseX = (mousePos.x - screenCenter.x) / screenCenter.x; // -1 to 1
+
+    if (Mathf.Abs(mouseX) < .3f) return;
+     float currentAngle = 0f;
+    float relativeAngle = -mouseX * 90f;
+    float targetAngle = 0f;
+
+ 
+        currentAngle = transform.eulerAngles.y;
+        targetAngle = currentAngle + relativeAngle;
+        Quaternion targetRot = Quaternion.Euler(transform.eulerAngles.x, targetAngle, transform.eulerAngles.z);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
+
+}
+   
 
 // handle player jump from space
     void HandleJump()
@@ -99,47 +122,56 @@ public class PlayerControler : MonoBehaviour
     }
 
 // Holo controller 
-    void RotateHolo()
+  void RotateHolo()
+{
+    bool holoActive = Input.GetKey(KeyCode.LeftArrow) || 
+                     Input.GetKey(KeyCode.RightArrow) || 
+                     Input.GetKey(KeyCode.UpArrow) || 
+                     Input.GetKey(KeyCode.DownArrow);
+
+    holObj.SetActive(holoActive);
+
+    if (holoActive)
     {
-        bool holoActive =
-            Input.GetKey(KeyCode.LeftArrow) ||
-            Input.GetKey(KeyCode.RightArrow) ||
-            Input.GetKey(KeyCode.UpArrow) ||
-            Input.GetKey(KeyCode.DownArrow);
+        isPreviewing = true;
 
-        holObj.SetActive(holoActive);
+        // Preview rotations (same as before)
+        if (Input.GetKey(KeyCode.LeftArrow))
+            pendingRotation = new Vector3(0, 0, 90);
+        else if (Input.GetKey(KeyCode.RightArrow))
+            pendingRotation = new Vector3(0, 0, -90);
+        else if (Input.GetKey(KeyCode.UpArrow))
+            pendingRotation = new Vector3(90, 0, 0);
+        else if (Input.GetKey(KeyCode.DownArrow))
+            pendingRotation = new Vector3(-90, 0, 0);
 
-        if (holoActive)
-        {
-            isPreviewing = true;
-
-            if (Input.GetKey(KeyCode.LeftArrow))
-                pendingRotation = new Vector3(0, 0, 90);
-
-            if (Input.GetKey(KeyCode.RightArrow))
-                pendingRotation = new Vector3(0, 0, -90);
-
-            if (Input.GetKey(KeyCode.UpArrow))
-                pendingRotation = new Vector3(90, 0, 0);
-
-            if (Input.GetKey(KeyCode.DownArrow))
-                pendingRotation = new Vector3(-90, 0, 0);
-
-            holoParent.localRotation = Quaternion.Euler(pendingRotation);
-        }
-
-        //  APPLY gravity to the player when press enter
-        if (!holoActive && isPreviewing && Input.GetKeyDown(KeyCode.Return))
-        {
-            isPreviewing = false;
-             Quaternion rotationDelta = Quaternion.Euler(pendingRotation);
-            transform.rotation = rotationDelta * transform.rotation;
-            
-            gravityDirection = -transform.up;
-            rb.linearVelocity = Vector3.zero;  
-
-        }
+        holoParent.localRotation = Quaternion.Euler(pendingRotation);
     }
+
+    // APPLY: Rotate to make CURRENT opposite-up the new down
+    if (!holoActive && isPreviewing && Input.GetKeyDown(KeyCode.Return))
+    {
+        isPreviewing = false;
+        
+        // Calculate rotation that aligns CURRENT transform.up to OPPOSITE direction
+        Vector3 currentUp = transform.up;
+        Vector3 targetUp = -currentUp;  // Opposite of current up = new down
+        
+        // Preview rotation direction applied to current orientation
+        Quaternion previewRot = Quaternion.Euler(pendingRotation);
+        Vector3 newUp = (previewRot * transform.rotation * Vector3.up).normalized;
+        
+        // Rotation from current up → new up direction
+        Quaternion rotationToTarget = Quaternion.FromToRotation(currentUp, newUp);
+        transform.rotation = rotationToTarget * transform.rotation;
+        
+        // Update gravity to new down direction
+        gravityDirection = -transform.up;
+        rb.linearVelocity = Vector3.zero;
+        holObj.SetActive(false);
+    }
+}
+
 
     void ApplyDirectionalGravity()
     {

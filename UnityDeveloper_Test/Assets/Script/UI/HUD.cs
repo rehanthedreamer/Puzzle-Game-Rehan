@@ -10,7 +10,7 @@ public class HUD : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void OnEnable()
     {
-         TimerManager.OnTimerUpdated += UpdateTimerUI;
+        TimerManager.OnTimerUpdated += UpdateTimerUI;
        PlayerControler.updateCubeCount += UpdateCubeCountUI;
         
     }
